@@ -94,11 +94,48 @@ public class YamlValidatorPluginIntTest {
 
         expectBuildSuccessAndSuccessMessageForDefaultYamlFile();
     }
+    
+    @Test
+    public void shouldAllowValidYamlWithMultipleDocuments() throws IOException {
+
+        writeBuildFileWithoutProperties();
+        writeValidYamlFileWithMultipleDocuments();
+
+        expectBuildSuccessAndSuccessMessageForYamlWithMulipleDocuments();
+    }
+    
+    @Test
+    public void shouldNotAllowYamlWithMultipleDocumentsWithErrorInFirstDocument() throws IOException {
+
+    	writeBuildFileWithoutProperties();
+    	writeInvalidValidYamlFileWithMultipleDocumentsWithErrorInFirstDocument();
+
+        expectBuildFailureAndFailureMessageForDefaultYamlFile();
+    }
+    
+    @Test
+    public void shouldNotAllowYamlWithMultipleDocumentsWithErrorInSecondDocument() throws IOException {
+
+    	writeBuildFileWithoutProperties();
+    	writeInvalidValidYamlFileWithMultipleDocumentsWithErrorInSecondDocument();
+
+    	expectBuildFailureAndFailureMessageForYamlWithMulipleDocumentsWithErrorInSecondDocument();
+    }
+    
+    @Test
+    public void shouldNotAllowYamlWithMultipleDocumentsWithErrorInLastDocument() throws IOException {
+
+    	writeBuildFileWithoutProperties();
+    	writeInvalidValidYamlFileWithMultipleDocumentsWithErrorInLastDocument();
+
+    	expectBuildFailureAndFailureMessageForYamlWithMulipleDocumentsWithErrorInLastDocument();
+    }
 
     @Test
     public void shouldSearchInMultipleFoldersWhenDefined() throws IOException {
 
         writeBuildFileWhichDefinesTwoDirectories();
+        writeValidYamlFileWithMultipleDocuments();
 
         expectBuildSuccessAndStartingMessageForBothDirectories();
     }
@@ -178,7 +215,7 @@ public class YamlValidatorPluginIntTest {
                 .create()
                 .withProjectDir(testProjectDir.getRoot())
                 .withPluginClasspath()
-                .withArguments("check")
+                .withArguments("check", "--info")
                 .build()
                 .getOutput();
 
@@ -292,6 +329,69 @@ public class YamlValidatorPluginIntTest {
                         "  key: value",
                 yamlFileInDefaultYamlDirectory);
     }
+    
+    private void writeValidYamlFileWithMultipleDocuments() {
+
+        writeFile(
+                "framework:\n" +
+                        "  key: value\n" +
+                        "  other: value\n" +
+                        "---\n" +
+                        "other:\n" +
+                        "  other: value\n" +
+                        "  key: value",
+                yamlFileInDefaultYamlDirectory);
+    }
+    
+    private void writeInvalidValidYamlFileWithMultipleDocumentsWithErrorInFirstDocument() {
+    	
+        writeFile(
+                "framework:\n" +
+                        "  key: value\n" +
+                        "  other: value\n" +
+                        "    other: value\n" +
+                        "---\n" +
+                        "other:\n" +
+                        "  other: value\n" +
+                        "  key: value",
+                yamlFileInDefaultYamlDirectory);
+    }
+    
+    private void writeInvalidValidYamlFileWithMultipleDocumentsWithErrorInSecondDocument() {
+    	
+        writeFile(
+                "framework:\n" +
+                        "  key: value\n" +
+                        "  other: value\n" +
+                        "---\n" +
+                        "other:\n" +
+                        "  other: value\n" +
+                        "  key: value\n" +
+                        "    other: value\n" +
+                        "---\n" +
+                        "another:\n" +
+                        "  key: value\n" +
+                        "  other: value\n",
+                yamlFileInDefaultYamlDirectory);
+    }
+    
+    private void writeInvalidValidYamlFileWithMultipleDocumentsWithErrorInLastDocument() {
+    	
+        writeFile(
+                "framework:\n" +
+                        "  key: value\n" +
+                        "  other: value\n" +
+                        "---\n" +
+                        "other:\n" +
+                        "  other: value\n" +
+                        "  key: value\n" +
+                        "---\n" +
+                        "another:\n" +
+                        "  key: value\n" +
+                        "  other: value\n" +
+                        "    other: value\n",
+                yamlFileInDefaultYamlDirectory);
+    }
 
     private File createAndGetYamlFileInSubdirectoryOfDefaultYamlDirectory() throws IOException {
 
@@ -382,6 +482,32 @@ public class YamlValidatorPluginIntTest {
 
         expectBuildSuccessAndAllOfFollowingLinesInOutput(expectedLineInOutput1, expectedLineInOutput2);
     }
+    
+    private void expectBuildSuccessAndSuccessMessageForYamlWithMulipleDocuments() throws IOException {
+
+        String expectedLineInOutput1 = String.format(YamlValidatorTask.FILE_SUCCESS_MESSAGE, yamlFileInDefaultYamlDirectory.toPath().toRealPath());
+        String expectedLineInOutput2 = String.format(YamlValidatorTask.DOCUMENT_VALID_MESSAGE, 1, yamlFileInDefaultYamlDirectory.toPath().toRealPath());
+        String expectedLineInOutput3 = String.format(YamlValidatorTask.DOCUMENT_VALID_MESSAGE, 2, yamlFileInDefaultYamlDirectory.toPath().toRealPath());
+
+        expectBuildSuccessAndAllOfFollowingLinesInOutput(expectedLineInOutput1, expectedLineInOutput2, expectedLineInOutput3);
+    }
+    
+    private void expectBuildFailureAndFailureMessageForYamlWithMulipleDocumentsWithErrorInSecondDocument() throws IOException {
+
+        String expectedLineInOutput1 = String.format(YamlValidatorTask.FILE_FAILURE_MESSAGE, yamlFileInDefaultYamlDirectory.toPath().toRealPath());
+        String expectedLineInOutput2 = String.format(YamlValidatorTask.DOCUMENT_VALID_MESSAGE, 1, yamlFileInDefaultYamlDirectory.toPath().toRealPath());
+
+        expectBuildFailureAndAllOfFollowingLinesInOutput(expectedLineInOutput1, expectedLineInOutput2);
+    }
+    
+    private void expectBuildFailureAndFailureMessageForYamlWithMulipleDocumentsWithErrorInLastDocument() throws IOException {
+
+        String expectedLineInOutput1 = String.format(YamlValidatorTask.FILE_FAILURE_MESSAGE, yamlFileInDefaultYamlDirectory.toPath().toRealPath());
+        String expectedLineInOutput2 = String.format(YamlValidatorTask.DOCUMENT_VALID_MESSAGE, 1, yamlFileInDefaultYamlDirectory.toPath().toRealPath());
+        String expectedLineInOutput3 = String.format(YamlValidatorTask.DOCUMENT_VALID_MESSAGE, 2, yamlFileInDefaultYamlDirectory.toPath().toRealPath());
+
+        expectBuildFailureAndAllOfFollowingLinesInOutput(expectedLineInOutput1, expectedLineInOutput2, expectedLineInOutput3);
+    }
 
     private void expectBuildSuccessAndSuccessMessageForDefaultFileAndFileInSubdirectory(File yamlFileInSubdirectoryInDefaultYamlDirectory) throws IOException {
 
@@ -430,6 +556,13 @@ public class YamlValidatorPluginIntTest {
 
         Arrays.stream(expectedLinesInOutput).forEach(expectedLineInOutput -> assertThat(output, containsString(expectedLineInOutput)));
     }
+    
+    private void expectBuildFailureAndAllOfFollowingLinesInOutput(String... expectedLinesInOutput) {
+
+        String output = runYamlValidateTaskExpectedToFailAndGetOutput();
+
+        Arrays.stream(expectedLinesInOutput).forEach(expectedLineInOutput -> assertThat(output, containsString(expectedLineInOutput)));
+    }
 
     private void expectBuildSuccessAndOutputButNotOtherOutput(String expectedLineInOutput, String unexpectedLineInOutput) {
 
@@ -456,7 +589,7 @@ public class YamlValidatorPluginIntTest {
                 .create()
                 .withProjectDir(testProjectDir.getRoot())
                 .withPluginClasspath()
-                .withArguments(VALIDATE_YAML_TASK_NAME);
+                .withArguments(VALIDATE_YAML_TASK_NAME, "--info");
     }
 
 }

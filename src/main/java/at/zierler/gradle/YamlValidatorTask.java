@@ -18,6 +18,7 @@ public class YamlValidatorTask extends DefaultTask {
     static final String STARTING_FILE_MESSAGE = "Starting validation of YAML file '%s'.";
     static final String FILE_SUCCESS_MESSAGE = "Validation of YAML file '%s' successful.";
     static final String FILE_FAILURE_MESSAGE = "Validation of YAML file '%s' failed.";
+    static final String DOCUMENT_VALID_MESSAGE = "Document %d of '%s' is valid";
 
     private final ValidationProperties validationProperties;
     private Yaml yaml;
@@ -72,13 +73,13 @@ public class YamlValidatorTask extends DefaultTask {
 
     private void validateYamlFilesOnlyDirectlyInDirectory(Path directory) throws IOException {
 
-        System.out.println(String.format(STARTING_DIRECTORY_MESSAGE, directory));
+    	getLogger().info(String.format(STARTING_DIRECTORY_MESSAGE, directory));
         Files.list(directory).filter(this::isYamlFile).forEach(this::validateYamlFile);
     }
 
     private void validateYamlFilesInDirectoryRecursively(Path directory) throws IOException {
 
-        System.out.println(String.format(STARTING_DIRECTORY_RECURSIVE_MESSAGE, directory));
+    	getLogger().info(String.format(STARTING_DIRECTORY_RECURSIVE_MESSAGE, directory));
         Files.walk(directory).filter(this::isYamlFile).forEach(this::validateYamlFile);
     }
 
@@ -97,15 +98,19 @@ public class YamlValidatorTask extends DefaultTask {
 
     private void validateYamlFile(Path file) {
 
-        System.out.println(String.format(STARTING_FILE_MESSAGE, file));
+    	getLogger().info(String.format(STARTING_FILE_MESSAGE, file));
+        int index = 1;
 
         try (InputStream yamlFileInputStream = Files.newInputStream(file)) {
-            yamlLoader().load(yamlFileInputStream);
+        	index = 1;
+            for(@SuppressWarnings("unused") Object document : yamlLoader().loadAll(yamlFileInputStream)){
+            	getLogger().info(String.format(DOCUMENT_VALID_MESSAGE, index++, file));
+            }
         } catch (Exception e) {
             throw new GradleException(String.format(FILE_FAILURE_MESSAGE, file), e);
         }
 
-        System.out.println(String.format(FILE_SUCCESS_MESSAGE, file));
+        getLogger().info(String.format(FILE_SUCCESS_MESSAGE, file));
     }
 
     private Yaml yamlLoader() {
