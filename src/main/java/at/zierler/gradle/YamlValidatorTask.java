@@ -73,14 +73,14 @@ public class YamlValidatorTask extends DefaultTask {
 
     private void validateYamlFilesOnlyDirectlyInDirectory(Path directory) throws IOException {
 
-    	getLogger().info(String.format(STARTING_DIRECTORY_MESSAGE, directory));
-        Files.list(directory).filter(this::isYamlFile).forEach(this::validateYamlFile);
+		getLogger().info(String.format(STARTING_DIRECTORY_MESSAGE, directory));
+		Files.list(directory).filter(this::isYamlFile).forEach(this::validateYamlFile);
     }
 
     private void validateYamlFilesInDirectoryRecursively(Path directory) throws IOException {
 
-    	getLogger().info(String.format(STARTING_DIRECTORY_RECURSIVE_MESSAGE, directory));
-        Files.walk(directory).filter(this::isYamlFile).forEach(this::validateYamlFile);
+		getLogger().info(String.format(STARTING_DIRECTORY_RECURSIVE_MESSAGE, directory));
+		Files.walk(directory).filter(this::isYamlFile).forEach(this::validateYamlFile);
     }
 
     private boolean isYamlFile(Path file) {
@@ -98,19 +98,20 @@ public class YamlValidatorTask extends DefaultTask {
 
     private void validateYamlFile(Path file) {
 
-    	getLogger().info(String.format(STARTING_FILE_MESSAGE, file));
-        int index = 1;
+		getLogger().info(String.format(STARTING_FILE_MESSAGE, file));
+		int index = 1;
 
-        try (InputStream yamlFileInputStream = Files.newInputStream(file)) {
-        	index = 1;
-            for(@SuppressWarnings("unused") Object document : yamlLoader().loadAll(yamlFileInputStream)){
-            	getLogger().info(String.format(DOCUMENT_VALID_MESSAGE, index++, file));
-            }
-        } catch (Exception e) {
-            throw new GradleException(String.format(FILE_FAILURE_MESSAGE, file), e);
-        }
+		try (InputStream yamlFileInputStream = Files.newInputStream(file)) {
+			index = 1;
+			for (@SuppressWarnings("unused")
+			Object document : yamlLoader().loadAll(yamlFileInputStream)) {
+				getLogger().info(String.format(DOCUMENT_VALID_MESSAGE, index++, file));
+			}
+		} catch (Exception e) {
+			throw new GradleException(String.format(FILE_FAILURE_MESSAGE, file), e);
+		}
 
-        getLogger().info(String.format(FILE_SUCCESS_MESSAGE, file));
+		getLogger().info(String.format(FILE_SUCCESS_MESSAGE, file));
     }
 
     private Yaml yamlLoader() {
