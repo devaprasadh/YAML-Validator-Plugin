@@ -1,3 +1,4 @@
+[![CircleCI](https://circleci.com/gh/devaprasadh/YAML-Validator-Plugin.svg?style=svg)](https://circleci.com/gh/devaprasadh/YAML-Validator-Plugin)
 # YAML Validator Plugin
 
 ## Introduction
