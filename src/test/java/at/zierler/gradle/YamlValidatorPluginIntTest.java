@@ -182,6 +182,24 @@ public class YamlValidatorPluginIntTest {
 
         expectBuildSuccessAndNoStartingMessageForNonYamlFile(nonYamlFile);
     }
+    
+    @Test
+    public void shouldNotValidateFolderWithYamlEnding() throws IOException {
+
+        File yamlFolder = createAndGetYamlFolderInDefaultYamlDirectory("org.yaml");
+        writeBuildFileWithNonYamlFileAsSearchPath(new File(DEFAULT_YAML_DIRECTORY_RELATIVE_PATH));
+
+        expectBuildSuccessAndNoStartingMessageForNonYamlFile(yamlFolder);
+    }
+    
+    @Test
+    public void shouldNotValidateFolderWithYmlEnding() throws IOException {
+
+        File yamlFolder = createAndGetYamlFolderInDefaultYamlDirectory("org.yml");
+        writeBuildFileWithNonYamlFileAsSearchPath(new File(DEFAULT_YAML_DIRECTORY_RELATIVE_PATH));
+
+        expectBuildSuccessAndNoStartingMessageForNonYamlFile(yamlFolder);
+    }
 
     @Test
     public void shouldNotValidateFileWithNonYamlEndingButValidateYamlFileInSameDirectory() throws IOException {
@@ -422,6 +440,11 @@ public class YamlValidatorPluginIntTest {
         String subdirectoryInDefaultYamlDirectoryRelativePath = DEFAULT_YAML_DIRECTORY_RELATIVE_PATH + "subdir/";
         testProjectDir.newFolder(subdirectoryInDefaultYamlDirectoryRelativePath.split("/"));
         return testProjectDir.newFile(subdirectoryInDefaultYamlDirectoryRelativePath + "file.yaml");
+    }
+    
+    private File createAndGetYamlFolderInDefaultYamlDirectory(String folderName) throws IOException {
+        String subdirectoryInDefaultYamlDirectoryRelativePath = DEFAULT_YAML_DIRECTORY_RELATIVE_PATH + folderName + "/";
+        return testProjectDir.newFolder(subdirectoryInDefaultYamlDirectoryRelativePath.split("/"));
     }
 
     private File createAndGetNonYamlFileInDefaultYamlDirectory() throws IOException {

@@ -93,7 +93,7 @@ public class YamlValidatorTask extends DefaultTask {
 
         String fileName = fileNameAsPath.toString();
 
-        return fileName.endsWith(".yaml") || fileName.endsWith(".yml");
+        return !Files.isDirectory(file) && (fileName.endsWith(".yaml") || fileName.endsWith(".yml"));
     }
 
     private void validateYamlFile(Path file) {
